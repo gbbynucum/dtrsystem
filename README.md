@@ -102,16 +102,7 @@ python manage.py migrate
 ```
 
 
-### 6. Create an Admin User
-Create a superuser to access the admin panel:
-```bash
-python manage.py createsuperuser
-```
-Follow the prompts to set up the username and password.
-
-
-
-### 7. Run the Development Server
+### 6. Run the Development Server
 Start the Django development server:
 ```bash
 .venv\Scripts\Activate
