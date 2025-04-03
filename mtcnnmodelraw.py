@@ -16,7 +16,7 @@ import torch.nn as nn
 import torch.optim as optim
 
 
-# python "c:\Users\Geb\Documents\VSC Projects\dtrsystem\myproject\myapp\mtcnn.py"
+
 
 # Import FaceNet and MTCNN from facenet-pytorch
 from facenet_pytorch import MTCNN, InceptionResnetV1
