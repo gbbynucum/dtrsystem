@@ -102,8 +102,10 @@ Update permissions if necessary (e.g., `chmod 755 media` on Linux).
 ### 8. Run the Development Server
 Start the Django development server:
 ```bash
-cd myproject    
 .venv\Scripts\Activate
+
+cd myproject    
+
 python manage.py runserver
 ```
 Access the application at `http://127.0.0.1:8000/`.
