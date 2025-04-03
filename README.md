@@ -34,20 +34,11 @@ source venv/bin/activate
 
 
 ### 3. Install Dependencies
-Create a `requirements.txt` file with the following content (or use the provided one if available):
-```plaintext
-django==5.1.6
-pyodbc
-Pillow
-opencv-python
-numpy
-torch
-torchvision
-facenet-pytorch
-```
+
 Install the dependencies:
 ```bash
-pip install -r requirements.txt
+pip install django==5.1.6 pyodbc Pillow opencv-python numpy torch torchvision facenet-pytorch
+
 ```
 **Note:** If using a GPU, ensure you have CUDA installed and install the appropriate PyTorch version with CUDA support. Refer to PyTorch's official site for details.
 
