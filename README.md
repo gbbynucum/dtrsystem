@@ -81,16 +81,8 @@ python manage.py createsuperuser
 Follow the prompts to set up the username and password.
 
 
-### 7. Set Up Media Directory
-The project stores employee images in the `media/employees/` directory. Ensure it’s writable:
-```bash
-mkdir media
-mkdir media/employees
-```
-Update permissions if necessary (e.g., `chmod 755 media` on Linux).
 
-
-### 8. Run the Development Server
+### 7. Run the Development Server
 Start the Django development server:
 ```bash
 .venv\Scripts\Activate
