@@ -66,6 +66,8 @@ Install the dependencies:
 ```bash
 pip install django==5.1.6 pyodbc Pillow opencv-python numpy torch torchvision facenet-pytorch
 
+pip install mssql-django
+
 ```
 **Note:** If using a GPU, ensure you have CUDA installed and install the appropriate PyTorch version with CUDA support. Refer to PyTorch's official site for details.
 
