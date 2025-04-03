@@ -34,6 +34,8 @@ myproject/
 │   └── editemployee.html     # Form for editing employee details
 └── manage.py                 # Django's command-line utility
 
+```
+
 
 ## 🛠️ Setup Instructions
 
