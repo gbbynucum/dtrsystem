@@ -23,7 +23,7 @@ cd <your-repo-name>
 ### 2. Create and Activate a Virtual Environment
 ```bash
 # On Windows
-python -m venv venv
+python -m venv .venv
 venv\Scripts\activate
 
 
