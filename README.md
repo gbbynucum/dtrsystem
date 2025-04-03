@@ -51,7 +51,7 @@ cd <your-repo-name>
 ```bash
 # On Windows
 python -m venv .venv
-venv\Scripts\activate
+.venv\Scripts\activate
 
 
 # On macOS/Linux
