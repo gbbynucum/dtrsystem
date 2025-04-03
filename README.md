@@ -9,6 +9,31 @@
 - **Webcam**: For facial recognition functionality
 - **GPU (optional)**: For faster face recognition processing with CUDA support
 
+## 📁 Project Structure  
+```plaintext
+myproject/
+├── myapp/
+│   ├── __init__.py
+│   ├── models.py             # Database models for employees and attendance records
+│   ├── mtcnn_logic.py        # Face detection and recognition logic using MTCNN
+│   ├── apps.py               # App configuration
+│   ├── urls.py               # URL routing for the app
+│   ├── views.py              # Request handling and business logic
+├── myproject/
+│   ├── __init__.py
+│   ├── settings.py           # Django project settings
+│   ├── urls.py               # Global URL configurations
+│   ├── views.py              # General views for the project
+│   ├── asgi.py               # ASGI configuration for asynchronous support
+│   └── wsgi.py               # WSGI configuration for deployment
+│── templates/
+│   ├── home.html             # Main homepage with time-in/time-out feature
+│   ├── adminlogin.html       # Admin login page
+│   ├── admins.html           # Admin dashboard
+│   ├── addemployee.html      # Form for adding employees
+│   └── editemployee.html     # Form for editing employee details
+└── manage.py                 # Django's command-line utility
+
 
 ## 🛠️ Setup Instructions
 
