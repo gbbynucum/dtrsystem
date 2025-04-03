@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Employee</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-br from-gray-200 to-gray-400 flex items-center justify-center min-h-screen p-4">
+
+    <div class="bg-white p-8 rounded-xl shadow-2xl w-full max-w-2xl">
+        <div class="text-center">
+            <div class="bg-blue-600 text-white p-3 rounded-full inline-block shadow-lg">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-8 h-8">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 15.75a3.75 3.75 0 100-7.5 3.75 3.75 0 000 7.5zM4.5 19.5a8.5 8.5 0 0115 0"/>
+                </svg>
+            </div>
+            <h2 class="text-3xl font-bold text-gray-800 mt-4">Add New Employee</h2>
+            <p class="text-gray-500 text-sm">Fill out the form below to register a new employee.</p>
+        </div>
+
+        {% if messages %}
+        <div class="mt-4">
+            {% for message in messages %}
+            <div class="p-3 mb-2 text-white rounded-md {% if message.tags == 'error' %}bg-red-600{% else %}bg-green-600{% endif %}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <form method="post" action="{% url 'add_employee' %}" enctype="multipart/form-data" class="space-y-6 mt-6">
+            {% csrf_token %}
+
+            <div>
+                <label class="block text-gray-700 font-medium mb-1">Full Name</label>
+                <input type="text" name="name" placeholder="Enter full name" required
+                       class="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+            </div>
+
+            <div>
+                <label class="block text-gray-700 font-medium mb-1">Department</label>
+                <input type="text" name="department" placeholder="Enter department" required
+                       class="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+            </div>
+
+            <div>
+                <label class="block text-gray-700 font-medium mb-1">Employee ID</label>
+                <input type="text" name="employee_id" placeholder="Enter employee ID" required
+                       class="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+            </div>
+
+            <div>
+                <label class="block text-gray-700 font-medium mb-1">Upload Employee Images (Max 10)</label>
+                <div id="drop-area" class="w-full p-6 border-2 border-dashed border-gray-400 rounded-lg text-center text-gray-500 cursor-pointer">
+                    Drag & Drop files here or click to upload
+                    <input type="file" id="fileInput" name="image1" accept="image/*" multiple hidden>
+                </div>
+                <div id="preview" class="mt-4 grid grid-cols-5 gap-2"></div>
+                <small class="text-gray-500">You can upload up to 10 images.</small>
+            </div>
+
+            {% for i in image_range %}
+            <input type="file" name="image{{ i }}" accept="image/*" hidden>
+            {% endfor %}
+
+            <div class="flex flex-col md:flex-row items-center justify-between gap-4 mt-6">
+                <button type="submit" class="w-full md:w-auto px-6 py-3 bg-green-600 text-white font-semibold rounded-lg shadow-md hover:bg-green-700 transition duration-300">
+                    Save Employee
+                </button>
+                <a href="{% url 'admin_dashboard' %}" class="w-full md:w-auto text-center px-6 py-3 bg-gray-500 text-white font-semibold rounded-lg shadow-md hover:bg-gray-600 transition duration-300">
+                    Back to Dashboard
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const dropArea = document.getElementById("drop-area");
+            const fileInput = document.getElementById("fileInput");
+            const preview = document.getElementById("preview");
+            let selectedFiles = [];
+    
+            dropArea.addEventListener("dragover", (event) => {
+                event.preventDefault();
+                dropArea.classList.add("border-blue-500");
+            });
+    
+            dropArea.addEventListener("dragleave", () => {
+                dropArea.classList.remove("border-blue-500");
+            });
+    
+            dropArea.addEventListener("drop", (event) => {
+                event.preventDefault();
+                dropArea.classList.remove("border-blue-500");
+                handleFiles(event.dataTransfer.files);
+            });
+    
+            dropArea.addEventListener("click", () => fileInput.click());
+            fileInput.addEventListener("change", () => handleFiles(fileInput.files));
+    
+            function handleFiles(files) {
+                const fileArray = Array.from(files);
+                if (selectedFiles.length + fileArray.length > 10) {
+                    alert("You can only upload up to 10 images.");
+                    return;
+                }
+    
+                fileArray.forEach((file) => {
+                    if (selectedFiles.length < 10) {
+                        selectedFiles.push(file);
+                        displayPreview(file);
+                    }
+                });
+    
+                updateHiddenInputs();
+            }
+    
+            function displayPreview(file) {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => {
+                    const imgContainer = document.createElement("div");
+                    imgContainer.classList.add("relative", "inline-block");
+    
+                    const img = document.createElement("img");
+                    img.src = reader.result;
+                    img.classList.add("w-16", "h-16", "object-cover", "rounded-md", "border");
+    
+                    const removeBtn = document.createElement("button");
+                    removeBtn.innerHTML = "&times;";
+                    removeBtn.classList.add("absolute", "-top-2", "-right-2", "bg-red-500", "text-white", "rounded-full", "w-5", "h-5", "flex", "items-center", "justify-center", "text-xs", "font-bold", "cursor-pointer");
+                    removeBtn.addEventListener("click", () => removeFile(file, imgContainer));
+    
+                    imgContainer.appendChild(img);
+                    imgContainer.appendChild(removeBtn);
+                    preview.appendChild(imgContainer);
+                };
+            }
+    
+            function removeFile(file, imgContainer) {
+                selectedFiles = selectedFiles.filter(f => f !== file);
+                imgContainer.remove();
+                updateHiddenInputs();
+            }
+    
+            function updateHiddenInputs() {
+                document.querySelectorAll(".hidden-file-input").forEach((input) => input.remove());
+    
+                selectedFiles.forEach((file, index) => {
+                    const input = document.createElement("input");
+                    input.type = "file";
+                    input.name = `image${index + 1}`;
+                    input.accept = "image/*";
+                    input.hidden = true;
+                    input.classList.add("hidden-file-input");
+    
+                    const dataTransfer = new DataTransfer();
+                    dataTransfer.items.add(file);
+                    input.files = dataTransfer.files;
+    
+                    document.forms[0].appendChild(input);
+                });
+            }
+        });
+    </script>
+    
+    
+    
+</body>
+</html>

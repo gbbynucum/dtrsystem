@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Employee</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-br from-gray-200 to-gray-400 flex items-center justify-center min-h-screen p-4">
+
+    <div class="bg-white p-8 rounded-xl shadow-2xl w-full max-w-2xl">
+        
+        <div class="text-center">
+            <h2 class="text-3xl font-bold text-gray-800 mt-4">Edit Employee</h2>
+            <p class="text-gray-500 text-sm">Update the employee details below.</p>
+        </div>
+
+        <!-- Display Messages -->
+        {% if messages %}
+        <div class="mt-4">
+            {% for message in messages %}
+            <div class="p-3 mb-2 text-white rounded-md {% if message.tags == 'error' %}bg-red-600{% else %}bg-green-600{% endif %}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <form id="employee-form" method="post" action="{% url 'edit_employee' employee.id %}" enctype="multipart/form-data" class="space-y-6 mt-6">
+            {% csrf_token %}
+
+            <div>
+                <label class="block text-gray-700 font-medium mb-1">Full Name</label>
+                <input type="text" name="name" value="{{ employee.name }}" required
+                       class="w-full p-3 border border-gray-300 rounded-lg">
+            </div>
+
+            <div>
+                <label class="block text-gray-700 font-medium mb-1">Department</label>
+                <input type="text" name="department" value="{{ employee.department }}" required
+                       class="w-full p-3 border border-gray-300 rounded-lg">
+            </div>
+
+            <div>
+                <label class="block text-gray-700 font-medium mb-1">Employee ID</label>
+                <input type="text" name="employee_id" value="{{ employee.employee_id }}" required
+                       class="w-full p-3 border border-gray-300 rounded-lg">
+            </div>
+
+            <!-- Display Current Employee Images with Remove Option -->
+            <div>
+                <label class="block text-gray-700 font-medium mb-1">Current Employee Images</label>
+                <div id="image-preview" class="grid grid-cols-3 md:grid-cols-4 gap-4 mt-3">
+                    {% for key, image_url in employee_images.items %}
+                        <div class="relative text-center image-container" id="image-{{ key }}">
+                            <img src="{{ image_url }}" alt="Employee Image" class="mt-2 w-24 h-24 rounded-lg border border-gray-300 shadow transition-transform hover:scale-105">
+                            <button type="button" onclick="removeImage('{{ key }}')" 
+                                    class="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold">
+                                &times;
+                            </button>
+                        </div>
+                    {% empty %}
+                        <p class="text-sm text-gray-500">No images uploaded.</p>
+                    {% endfor %}
+                </div>
+                <input type="hidden" name="removed_images" id="removed_images">
+            </div>
+
+            <!-- Drag & Drop Upload -->
+            <div>
+                <label class="block text-gray-700 font-medium mb-1">Upload New Images (Max: 10)</label>
+                <div id="drop-area" class="border-dashed border-2 border-gray-300 p-6 text-center rounded-lg cursor-pointer">
+                    <p class="text-gray-500">Drag & drop images here or click to browse</p>
+                    <input type="file" name="new_images" id="new_images" multiple accept="image/*" class="hidden">
+                </div>
+                <div id="selected-images" class="grid grid-cols-3 md:grid-cols-4 gap-4 mt-3"></div>
+                <p class="text-sm text-gray-500 mt-1">You can replace removed images with new ones.</p>
+                <p id="image-count" class="text-sm font-medium mt-1">
+                    Current: <span id="current-count">{% if employee_images %}{{ employee_images|length }}{% else %}0{% endif %}</span> / 10
+                </p>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex flex-col md:flex-row items-center justify-between gap-4 mt-6">
+                <button type="submit" class="w-full md:w-auto px-6 py-3 bg-yellow-500 text-white font-semibold rounded-lg hover:bg-yellow-600">
+                    Update Employee
+                </button>
+                <a href="{% url 'admin_dashboard' %}" class="w-full md:w-auto text-center px-6 py-3 bg-gray-500 text-white font-semibold rounded-lg hover:bg-gray-600">
+                    Done
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        let removedImages = [];
+        let currentCount = parseInt(document.getElementById("current-count").innerText) || 0;
+        const maxImages = 10;
+        const fileInput = document.getElementById("new_images");
+        const dropArea = document.getElementById("drop-area");
+        const selectedImagesDiv = document.getElementById("selected-images");
+        const form = document.getElementById("employee-form");
+        let droppedFiles = []; // Store drag-and-drop files separately
+
+        function removeImage(imageKey) {
+            const imageDiv = document.getElementById(`image-${imageKey}`);
+            if (imageDiv) {
+                if (confirm("Are you sure you want to remove this image?")) {
+                    imageDiv.style.display = "none"; 
+                    removedImages.push(imageKey);
+                    document.getElementById("removed_images").value = removedImages.join(",");
+                    currentCount--;
+                    updateCount();
+                }
+            }
+        }
+
+        function updateCount() {
+            document.getElementById("current-count").innerText = currentCount;
+        }
+
+        dropArea.addEventListener("click", () => fileInput.click());
+
+        dropArea.addEventListener("dragover", (e) => {
+            e.preventDefault();
+            dropArea.classList.add("border-gray-500");
+        });
+
+        dropArea.addEventListener("dragleave", () => {
+            dropArea.classList.remove("border-gray-500");
+        });
+
+        dropArea.addEventListener("drop", (e) => {
+            e.preventDefault();
+            dropArea.classList.remove("border-gray-500");
+            handleFiles(e.dataTransfer.files);
+        });
+
+        fileInput.addEventListener("change", function() {
+            handleFiles(this.files);
+        });
+
+        function handleFiles(files) {
+            if (currentCount + files.length > maxImages) {
+                alert(`You can only upload a maximum of ${maxImages} images.`);
+                return;
+            }
+
+            for (let file of files) {
+                if (currentCount >= maxImages) {
+                    alert("Maximum image limit reached.");
+                    return;
+                }
+
+                const img = document.createElement("img");
+                img.classList.add("w-24", "h-24", "rounded-lg", "border", "border-gray-300", "shadow");
+                img.src = URL.createObjectURL(file);
+                selectedImagesDiv.appendChild(img);
+
+                droppedFiles.push(file); // Store the file in the array
+                currentCount++;
+            }
+            updateCount();
+        }
+
+        form.addEventListener("submit", function(event) {
+            event.preventDefault();  // Prevent normal form submission
+            let formData = new FormData(form);
+
+            // Append files from both input and drag-drop
+            for (let file of fileInput.files) {
+                formData.append("new_images", file);
+            }
+            for (let file of droppedFiles) {
+                formData.append("new_images", file);
+            }
+
+            // Add removed images
+            formData.append("removed_images", removedImages.join(","));
+
+            fetch(form.action, {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value
+                },
+                body: formData
+            }).then(response => {
+                if (response.ok) {
+                    window.location.reload();
+                } else {
+                    alert("Failed to upload images. Please try again.");
+                }
+            }).catch(error => console.error("Error:", error));
+        });
+
+    </script>
+    
+
+</body>
+</html>

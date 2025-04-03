@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-br from-gray-200 to-gray-400 flex items-center justify-center min-h-screen px-4">
+
+    <!-- Login Card -->
+    <div class="bg-white p-8 rounded-xl shadow-2xl w-full max-w-md">
+        
+        <!-- Icon & Heading -->
+        <div class="flex flex-col items-center mb-6">
+            <div class="bg-blue-600 text-white p-3 rounded-full">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-8 h-8">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 15.75a3.75 3.75 0 100-7.5 3.75 3.75 0 000 7.5zM4.5 19.5a8.5 8.5 0 0115 0"/>
+                </svg>
+            </div>
+            <h2 class="text-3xl font-bold text-gray-800 mt-3">Admin Login</h2>
+            <p class="text-gray-500 text-sm text-center">Sign in to access the admin dashboard</p>
+        </div>
+
+        <!-- Admin Login Form -->
+        <form method="post" class="space-y-5" onsubmit="return validateForm()">
+            {% csrf_token %}
+
+            <!-- Username -->
+            <div>
+                <label class="block text-gray-700 font-medium mb-1">Username</label>
+                <input type="text" name="username" id="username" placeholder="Enter admin username" 
+                       class="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                <p id="username-error" class="text-red-500 text-sm mt-1 hidden">Username is required.</p>
+            </div>
+
+            <!-- Password -->
+            <div class="relative">
+                <label class="block text-gray-700 font-medium mb-1">Password</label>
+                <input type="password" name="password" id="password" placeholder="Enter password"
+                class="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                oncopy="return false" onpaste="return false" oncut="return false" autocomplete="off">
+            
+                <!-- Password Toggle Icon -->
+                <button type="button" class="absolute right-3 top-10 text-gray-500 focus:outline-none" onclick="togglePassword()">
+                    <svg id="eye-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5c-7.5 0-12 7.5-12 7.5s4.5 7.5 12 7.5 12-7.5 12-7.5-4.5-7.5-12-7.5zM12 15.75a3.75 3.75 0 110-7.5 3.75 3.75 0 010 7.5z"/>
+                    </svg>
+                </button>
+
+                <p id="password-error" class="text-red-500 text-sm mt-1 hidden">Password is required.</p>
+            </div>
+
+            <!-- Error Message (from Django) -->
+            {% if messages %}
+                <div id="error-box" class="mt-4 p-4 border border-red-500 bg-red-100 text-red-700 rounded-md">
+                    {% for message in messages %}
+                        <p class="font-semibold">{{ message }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <!-- Buttons -->
+            <div class="flex flex-col sm:flex-row justify-between items-center gap-3">
+                <!-- Cancel Button -->
+                <a href="{% url 'home' %}" 
+                   class="w-full sm:w-auto text-center px-4 py-2 bg-red-500 text-white rounded-lg shadow-md hover:bg-red-600 transition duration-300">
+                    Cancel
+                </a> 
+
+                <!-- Login Button -->
+                <button type="submit" 
+                        class="w-full sm:w-auto px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 transition duration-300">
+                    Login
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- JavaScript for Validation & Password Toggle -->
+    <script>
+        function validateForm() {
+            let valid = true;
+            const username = document.getElementById('username');
+            const password = document.getElementById('password');
+            const usernameError = document.getElementById('username-error');
+            const passwordError = document.getElementById('password-error');
+
+            usernameError.classList.add('hidden');
+            passwordError.classList.add('hidden');
+
+            if (username.value.trim() === "") {
+                usernameError.classList.remove('hidden');
+                valid = false;
+            }
+
+            if (password.value.trim() === "") {
+                passwordError.classList.remove('hidden');
+                valid = false;
+            }
+
+            return valid;
+        }
+
+        function togglePassword() {
+            const passwordField = document.getElementById('password');
+            const eyeIcon = document.getElementById('eye-icon');
+
+            if (passwordField.type === "password") {
+                passwordField.type = "text";
+                eyeIcon.classList.add("text-blue-500");
+            } else {
+                passwordField.type = "password";
+                eyeIcon.classList.remove("text-blue-500");
+            }
+        }
+
+        window.onload = function() {
+            const errorBox = document.getElementById('error-box');
+            if (errorBox) {
+                setTimeout(() => {
+                    errorBox.style.opacity = '0';
+                    setTimeout(() => { errorBox.style.display = 'none'; }, 500);
+                }, 3000);
+            }
+        };
+
+    </script>
+
+</body>
+</html>

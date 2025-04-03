@@ -1,0 +1,198 @@
+<!-- templates/home.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance DTR System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        function updateTime() {
+            const options = { timeZone: "Asia/Manila", hour12: true, hour: "2-digit", minute: "2-digit", second: "2-digit" };
+            const dateOptions = { timeZone: "Asia/Manila", year: "numeric", month: "long", day: "numeric" };
+            document.getElementById("current-time").innerText = new Date().toLocaleTimeString("en-US", options);
+            document.getElementById("current-date").innerText = new Date().toLocaleDateString("en-US", dateOptions);
+        }
+        setInterval(updateTime, 1000);
+
+        let attendanceType = "";
+        let videoInterval = null;
+        let isStopping = false;
+
+        function toggleForm(show) {
+            const form = document.getElementById("attendance-form");
+            if (show) {
+                form.classList.remove("hidden");
+                setTimeout(() => form.classList.remove("opacity-0"), 10);
+            } else {
+                form.classList.add("opacity-0");
+                setTimeout(() => form.classList.add("hidden"), 300);
+            }
+        }
+
+        function resetForm() {
+            document.getElementById("attendance-type").value = attendanceType;
+            document.getElementById("attendance-name").value = "";
+            document.getElementById("attendance-department").value = "";
+            document.getElementById("attendance-employee-id").value = "";
+        }
+
+        function startVideoFeed() {
+            const video = document.getElementById("camera-feed");
+            isStopping = false;
+            video.src = "{% url 'video_feed' %}";
+            video.onerror = () => {
+                if (!isStopping) {
+                    alert("Error: Could not access the camera. Please ensure it’s connected and not in use.");
+                    stopVideoFeed();
+                }
+            };
+
+            resetForm();
+            toggleForm(true);
+
+            videoInterval = setInterval(() => {
+                fetch("{% url 'get_employee_data' %}")
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status !== 'no_employee') {
+                            updateForm(data);
+                        }
+                    })
+                    .catch(error => console.error("Error fetching employee data:", error));
+            }, 1000);
+        }
+
+        function stopVideoFeed() {
+            const video = document.getElementById("camera-feed");
+            isStopping = true;
+            video.src = "";
+            if (videoInterval) {
+                clearInterval(videoInterval);
+                videoInterval = null;
+            }
+            toggleForm(false);
+        }
+
+        function updateForm(employeeData) {
+            if (employeeData) {
+                document.getElementById("attendance-name").value = employeeData.name;
+                document.getElementById("attendance-department").value = employeeData.department;
+                document.getElementById("attendance-employee-id").value = employeeData.employee_id;
+            }
+        }
+
+        function logAttendance() {
+            const attendanceType = document.getElementById("attendance-type").value;
+            fetch("{% url 'log_attendance' %}", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                    "X-CSRFToken": "{{ csrf_token }}"
+                },
+                body: `attendance_type=${encodeURIComponent(attendanceType)}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);
+                if (data.status === 'success') {
+                    stopVideoFeed();
+                }
+            })
+            .catch(error => console.error("Error logging attendance:", error));
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            document.getElementById("time-in-btn").addEventListener("click", () => {
+                attendanceType = "Time In";
+                startVideoFeed();
+            });
+
+            document.getElementById("time-out-btn").addEventListener("click", () => {
+                attendanceType = "Time Out";
+                startVideoFeed();
+            });
+
+            document.getElementById("close-form-btn").addEventListener("click", () => {
+                stopVideoFeed();
+            });
+
+            document.getElementById("proceed-btn").addEventListener("click", logAttendance);
+        });
+    </script>
+</head>
+<body class="bg-gray-100 flex items-center justify-center h-screen">
+    <div class="flex flex-col lg:flex-row w-full max-w-[90%] h-full p-4 md:p-8 gap-6">
+        <div class="w-full lg:w-2/3 flex flex-col items-center justify-between bg-gray-200 p-6 rounded-lg shadow-lg relative">
+            <div class="w-full text-center mt-6">
+                <h2 class="text-4xl font-bold text-blue-700 drop-shadow-md tracking-wide py-2">Look Here!</h2>
+            </div>
+            <div class="w-full max-w-5xl h-[500px] sm:h-[600px] bg-black flex items-center justify-center text-white text-lg font-semibold rounded-lg shadow-xl mt-4">
+                <img id="camera-feed" class="w-full h-full object-cover" alt="Camera Feed">
+            </div>
+            <div class="w-full flex justify-start mt-6">
+                <a href="{% url 'admin_login' %}" class="p-3 bg-blue-600 text-white rounded-full shadow-md hover:bg-blue-700 transition duration-300 relative group">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-7 h-7">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 15.75a3.75 3.75 0 100-7.5 3.75 3.75 0 000 7.5zM4.5 19.5a8.5 8.5 0 0115 0"/>
+                    </svg>
+                    <span class="absolute bottom-10 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition">
+                        Admin
+                    </span>
+                </a>
+            </div>
+        </div>
+        <div class="w-full lg:w-1/3 flex flex-col items-center justify-center bg-white p-8 rounded-lg shadow-lg relative">
+            <h2 class="text-4xl font-bold text-gray-800 mb-8 text-center">Employee Attendance</h2>
+            <div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-6 mb-8">
+                <button id="time-in-btn" class="w-full sm:w-auto px-10 py-5 bg-green-500 text-white text-lg font-semibold rounded-lg shadow-md hover:bg-green-600 transition duration-300">
+                    Time In
+                </button>
+                <button id="time-out-btn" class="w-full sm:w-auto px-10 py-5 bg-red-500 text-white text-lg font-semibold rounded-lg shadow-md hover:bg-red-600 transition duration-300">
+                    Time Out
+                </button>
+            </div>
+            <div class="w-full max-w-md bg-gray-100 p-8 rounded-lg shadow-md text-center">
+                <p class="text-2xl font-semibold text-gray-700">Current Time</p>
+                <p id="current-time" class="text-4xl font-bold text-blue-600 mt-2">--:--:--</p>
+            </div>
+            <div class="w-full max-w-md bg-gray-100 p-8 rounded-lg shadow-md text-center mt-6">
+                <p class="text-2xl font-semibold text-gray-700">Current Date</p>
+                <p id="current-date" class="text-xl font-bold text-gray-800 mt-2">Loading...</p>
+            </div>
+
+            <!-- Attendance Form -->
+            <div id="attendance-form" class="absolute top-0 left-0 w-full h-full flex items-center justify-center bg-gray-900 bg-opacity-50 backdrop-blur-md hidden opacity-0 transition-opacity duration-300">
+                <div class="bg-white p-8 rounded-lg shadow-xl w-[90%] max-w-md relative">
+                    <button id="close-form-btn" class="absolute top-4 right-4 text-gray-600 hover:text-gray-900">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                    <h3 class="text-3xl font-bold text-gray-800 mb-6 text-center">Employee Details</h3>
+                    <div class="mb-4">
+                        <label class="block text-gray-700 font-medium">Attendance Type</label>
+                        <input id="attendance-type" type="text" class="w-full p-3 border rounded-lg bg-gray-200 text-gray-700" disabled>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-700 font-medium">Full Name</label>
+                        <input id="attendance-name" type="text" class="w-full p-3 border rounded-lg bg-gray-200 text-gray-700" disabled>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-700 font-medium">Department</label>
+                        <input id="attendance-department" type="text" class="w-full p-3 border rounded-lg bg-gray-200 text-gray-700" disabled>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-700 font-medium">Employee ID</label>
+                        <input id="attendance-employee-id" type="text" class="w-full p-3 border rounded-lg bg-gray-200 text-gray-700" disabled>
+                    </div>
+                    <div class="flex justify-end mt-6">
+                        <button id="proceed-btn" class="px-6 py-3 bg-blue-600 text-white text-lg font-semibold rounded-lg shadow-md hover:bg-blue-700 transition duration-300">
+                            Proceed
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
