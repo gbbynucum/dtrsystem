@@ -1,7 +1,7 @@
 # Face Recognition-Based Attendance System
 
 
-## 📌 Prerequisites
+## Prerequisites
 - **Python**: Version 3.8 or higher
 - **Git**: To clone the repository
 - **Microsoft SQL Server**: For the database (configured in `settings.py`)
@@ -9,7 +9,7 @@
 - **Webcam**: For facial recognition functionality
 - **GPU (optional)**: For faster face recognition processing with CUDA support
 
-## 📁 Project Structure  
+## Project Structure  
 ```plaintext
 myproject/
 ├── myapp/
@@ -37,7 +37,7 @@ myproject/
 ```
 
 
-## 🛠️ Setup Instructions
+## Setup Instructions
 
 
 ### 1. Clone the Repository
@@ -114,9 +114,9 @@ python manage.py runserver
 Access the application at `http://127.0.0.1:8000/`.
 
 
-## 🚀 Usage
+## Usage
 - **Homepage:** Click "Time In" or "Time Out" to start the webcam feed for attendance logging.
-- **Admin Login:** Go to `/adminlogin/` or click the admin icon to log in.
+- **Admin Login:** Go to `/adminlogin/` or click the admin icon to log in. Admin: admin Password: password
 - **Admin Dashboard:** Manage employees, view logs, and retrain the model at `/admins/`.
 - **Add/Edit Employees:** Upload up to 10 images per employee for accurate recognition.
 - **Retrain Model:** Use the "Retrain Model" button in the admin dashboard to update the face recognition classifier after adding or editing employees.
