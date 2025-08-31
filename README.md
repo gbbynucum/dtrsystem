@@ -116,13 +116,13 @@ Access the application at `http://127.0.0.1:8000/`.
 
 ## Usage
 - **Homepage:** Click "Time In" or "Time Out" to start the webcam feed for attendance logging.
-- **Admin Login:** Go to `/adminlogin/` or click the admin icon to log in. Admin: admin Password: password
+- **Admin Login:** Go to `/adminlogin/` or click the admin icon to log in. Username: admin / Password: password
 - **Admin Dashboard:** Manage employees, view logs, and retrain the model at `/admins/`.
 - **Add/Edit Employees:** Upload up to 10 images per employee for accurate recognition.
 - **Retrain Model:** Use the "Retrain Model" button in the admin dashboard to update the face recognition classifier after adding or editing employees.
 
 
-## 🔧 Troubleshooting
+## Troubleshooting
 - **Webcam Issues:** Ensure your webcam is connected and not in use by another application.
 - **Database Errors:** Verify SQL Server is running and the ODBC driver is installed.
 - **Recognition Failures:** Ensure employee images are clear and well-lit. Retrain the model if recognition accuracy is low.
