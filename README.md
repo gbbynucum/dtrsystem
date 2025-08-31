@@ -81,7 +81,7 @@ DATABASES = {
         'NAME': 'DTR',  # Your database name
         'USER': '',     # Leave empty for Windows Authentication
         'PASSWORD': '',  # Leave empty for Windows Authentication
-        'HOST': 'OWEL',  # Your SQL Server name
+        'HOST': '',  # Your SQL Server name
         'PORT': '',     # Default is 1433
         'OPTIONS': {
             'driver': 'ODBC Driver 17 for SQL Server',
